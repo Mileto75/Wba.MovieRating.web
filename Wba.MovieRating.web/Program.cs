@@ -1,6 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using Wba.MovieRating.Web.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+//Add database service
+builder.Services.AddDbContext<MovieDbContext>(
+    options => options
+        .UseSqlServer(builder.Configuration.GetConnectionString("MovieDb"))
+    );
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
