@@ -8,6 +8,12 @@ namespace Wba.MovieRating.Web.Data
         //define the tables
         public DbSet<Movie> Movies { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Director> Directors { get; set; }
+        public DbSet<Actor> Actors { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<MovieActor> MovieActors { get; set; }
+      
         public MovieDbContext(DbContextOptions<MovieDbContext> options) : base(options)
         {
         }
