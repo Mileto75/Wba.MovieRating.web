@@ -9,7 +9,6 @@ namespace Wba.MovieRating.Core.Entities
 {
     public class Rating : BaseEntity
     {
-        [Range(1,5)]
         public int Score { get; set; }
         public string Review { get; set; }
         //movie
