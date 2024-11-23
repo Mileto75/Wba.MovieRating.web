@@ -20,5 +20,6 @@ namespace Wba.MovieRating.Core.Entities
         //by convention many to many
         public ICollection<Director> Directors { get; set; }
         public ICollection<MovieActor> Actors { get; set; }
+        public string Image { get; set; }
     }
 }

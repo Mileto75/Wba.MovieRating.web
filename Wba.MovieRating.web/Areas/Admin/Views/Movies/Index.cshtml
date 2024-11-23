@@ -12,10 +12,10 @@
 <div class="row">
     @foreach (var movie in Model.Movies)
     {
-        <div class="col col-lg-3 mx-auto text-center">
+        <div class="col col-lg-3 m-2 text-center">
             <div class="card" style="width: 18rem;">
                 <!--tips: add .text-center,.text-right to the .card to change card text alignment-->
-                <img src="@movie.Image" class="card-img-top" alt="@movie.Value">
+                <img src="/images/@movie.Image" class="card-img-top" alt="@movie.Value">
                 <div class="card-body">
                     <h5 class="card-title">@movie.Value</h5>
                     <a asp-area="Admin" asp-controller="Movies"
