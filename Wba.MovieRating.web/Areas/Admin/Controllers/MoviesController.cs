@@ -86,129 +86,23 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            var moviesAddViewModel = new MoviesAddViewModel
-            {
-                Companies = await _movieDbContext
-                            .Companies.Select(c => new SelectListItem
-                            {
-                                Text = c.Name,
-                                Value = c.Id.ToString()
-                            }).ToListAsync(),
-                Actors = await _movieDbContext
-                            .Actors.Select(a => new SelectListItem
-                            {
-                                Text = $"{a.Firstname} {a.Lastname}",
-                                Value = a.Id.ToString()
-                            }).ToListAsync(),
-                Directors = await _movieDbContext
-                                   .Directors
-                                   .Select(d => new CheckboxModel
-                                   { 
-                                        Id = d.Id,
-                                        Value = $"{d.Firstname} {d.Lastname}"
-                                   }).ToListAsync(),
-            };
-            moviesAddViewModel.ReleaseDate = DateTime.Now;
-            return View(moviesAddViewModel);
+            //load data in viewmodel
+            return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(MoviesAddViewModel moviesAddViewModel)
         { 
-            if(!ModelState.IsValid)
-            {
-                moviesAddViewModel.Companies = await _movieDbContext
-                            .Companies.Select(c => new SelectListItem
-                            {
-                                Text = c.Name,
-                                Value = c.Id.ToString()
-                            }).ToListAsync();
-                moviesAddViewModel.Actors = await _movieDbContext
-                            .Actors.Select(a => new SelectListItem
-                            {
-                                Text = $"{a.Firstname} {a.Lastname}",
-                                Value = a.Id.ToString()
-                            }).ToListAsync();
-                moviesAddViewModel.Directors = await _movieDbContext
-                                   .Directors
-                                   .Select(d => new CheckboxModel
-                                   {
-                                       Id = d.Id,
-                                       Value = $"{d.Firstname} {d.Lastname}"
-                                   }).ToListAsync();
-                return View(moviesAddViewModel);
-            }
+            //validate
+            //check if file upload and handle it
             //create the movie
-            //handle file upload
-            var filename = "";
-            if(moviesAddViewModel.Image != null)
-            {
-                //create unique filename
-                filename = $"{Guid.NewGuid()}_{moviesAddViewModel.Image.FileName}";
-                //create folder
-                var folderToImages = Path.Combine(_webHostEnvironment.WebRootPath,
-                    "images");
-                if (!Directory.Exists(folderToImages))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(folderToImages);
-                    }
-                    catch(UnauthorizedAccessException unauthorizedAccessException)
-                    {
-                        Console.WriteLine(unauthorizedAccessException.Message);
-                        return RedirectToAction("Error", "Home", new ErrorViewModel 
-                        {
-                            RequestId = "testApp",
-                        });
-                    }
-                }
-                //create fullpath
-                var fullpath = Path.Combine(folderToImages, filename);
-                //copy to path
-                try
-                {
-                    using (FileStream fileStream = new FileStream(fullpath, FileMode.Create))
-                    {
-                        await moviesAddViewModel.Image.CopyToAsync(fileStream);
-                    }
-                }
-                catch (IOException iOexception)
-                {
-                    Console.WriteLine(iOexception.Message);
-                    return RedirectToAction("Error", "Home", new ErrorViewModel
-                    {
-                        RequestId = "testApp",
-                    });
-                }
-            }
-            //create the movie
-            //get the selected directorIds
-            var selectedDirectorIds = moviesAddViewModel.Directors
-                .Where(d => d.IsChecked == true)
-                .Select(d => d.Id);
-            var movie = new Movie
-            {
-                Title = moviesAddViewModel.Title,
-                ReleaseDate = moviesAddViewModel.ReleaseDate,
-                Directors = await _movieDbContext
-                            .Directors.Where(a => selectedDirectorIds
-                            .Contains(a.Id)).ToListAsync(),
-
-                CompanyId = moviesAddViewModel.CompanyId,
-                Image = filename
-            };
+            //get the selected directorIds and add to movie
+            
             //add the actors
-            movie.Actors = new List<MovieActor>();
-            foreach(var actor in moviesAddViewModel.ActorIds)
-            {
-                movie.Actors.Add(new MovieActor { MovieId = movie.Id, ActorId = actor,Character = "test" });
-            }
+            
             //add to change tracker
-            _movieDbContext.Movies.Add(movie);
-
+            
             //savechanges
-            await _movieDbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
     }
