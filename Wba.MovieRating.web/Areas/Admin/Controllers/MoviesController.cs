@@ -115,6 +115,13 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(MoviesAddViewModel moviesAddViewModel)
         { 
+            //check if movie exists
+            if(await _movieDbContext.Movies
+                .AnyAsync(m => m.Title.Equals(moviesAddViewModel.Title)))
+            {
+                //add custom error
+                ModelState.AddModelError("Title", "Title exists!");
+            }
             if(!ModelState.IsValid)
             {
                 moviesAddViewModel.Companies = await _movieDbContext
