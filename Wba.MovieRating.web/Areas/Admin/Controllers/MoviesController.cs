@@ -93,8 +93,36 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(MoviesAddViewModel moviesAddViewModel)
         { 
-            //validate
-            //check if file upload and handle it
+            //check if movie exists
+            if(await _movieDbContext.Movies
+                .AnyAsync(m => m.Title.Equals(moviesAddViewModel.Title)))
+            {
+                //add custom error
+                ModelState.AddModelError("Title", "Title exists!");
+            }
+            if(!ModelState.IsValid)
+            {
+                moviesAddViewModel.Companies = await _movieDbContext
+                            .Companies.Select(c => new SelectListItem
+                            {
+                                Text = c.Name,
+                                Value = c.Id.ToString()
+                            }).ToListAsync();
+                moviesAddViewModel.Actors = await _movieDbContext
+                            .Actors.Select(a => new SelectListItem
+                            {
+                                Text = $"{a.Firstname} {a.Lastname}",
+                                Value = a.Id.ToString()
+                            }).ToListAsync();
+                moviesAddViewModel.Directors = await _movieDbContext
+                                   .Directors
+                                   .Select(d => new CheckboxModel
+                                   {
+                                       Id = d.Id,
+                                       Value = $"{d.Firstname} {d.Lastname}"
+                                   }).ToListAsync();
+                return View(moviesAddViewModel);
+            }
             //create the movie
             //get the selected directorIds and add to movie
             

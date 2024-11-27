@@ -1,7 +1,7 @@
 ﻿@model MoviesAddViewModel
 
 <div class="row">
-    <div class="col col-lg-5 mx-auto">
+    <div class="col col-lg-5 mx-auto border border-1 rounded rounded-2">
         <h5>New movie</h5>
         <form asp-controller="Movies" asp-action="Add" method="post" enctype="multipart/form-data">
             <div class="form-group">
@@ -28,7 +28,7 @@
                 <input asp-for="Image" class="form-control">
                 <span asp-validation-for="Image" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="submit" class="btn btn-primary mb-1">Add</button>
         </form>
     </div>
 </div>
