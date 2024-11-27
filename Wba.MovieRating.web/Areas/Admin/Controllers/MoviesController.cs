@@ -124,13 +124,76 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
                 return View(moviesAddViewModel);
             }
             //create the movie
-            //get the selected directorIds and add to movie
-            
+            //handle file upload
+            var filename = "";
+            if (moviesAddViewModel.Image != null)
+            {
+                //create unique filename
+                filename = $"{Guid.NewGuid()}_{moviesAddViewModel.Image.FileName}";
+                //create folder
+                var folderToImages = Path.Combine(_webHostEnvironment.WebRootPath,
+                    "images");
+                if (!Directory.Exists(folderToImages))
+                {
+                    try
+                    {
+                        Directory.CreateDirectory(folderToImages);
+                    }
+                    catch (UnauthorizedAccessException unauthorizedAccessException)
+                    {
+                        Console.WriteLine(unauthorizedAccessException.Message);
+                        return RedirectToAction("Error", "Home", new ErrorViewModel
+                        {
+                            RequestId = "testApp",
+                        });
+                    }
+                }
+                //create fullpath
+                var fullpath = Path.Combine(folderToImages, filename);
+                //copy to path
+                try
+                {
+                    using (FileStream fileStream = new FileStream(fullpath, FileMode.Create))
+                    {
+                        await moviesAddViewModel.Image.CopyToAsync(fileStream);
+                    }
+                }
+                catch (IOException iOexception)
+                {
+                    Console.WriteLine(iOexception.Message);
+                    return RedirectToAction("Error", "Home", new ErrorViewModel
+                    {
+                        RequestId = "testApp",
+                    });
+                }
+            }
+            //create the movie
+            //get the selected directorIds
+            var selectedDirectorIds = moviesAddViewModel.Directors
+                .Where(d => d.IsChecked == true)
+                .Select(d => d.Id);
+            var movie = new Movie
+            {
+                Title = moviesAddViewModel.Title,
+                ReleaseDate = moviesAddViewModel.ReleaseDate,
+                Directors = await _movieDbContext
+                            .Directors.Where(a => selectedDirectorIds
+                            .Contains(a.Id)).ToListAsync(),
+
+                CompanyId = moviesAddViewModel.CompanyId,
+                Image = filename
+            };
             //add the actors
-            
+            movie.Actors = new List<MovieActor>();
+            foreach (var actor in moviesAddViewModel.ActorIds)
+            {
+                movie.Actors.Add(new MovieActor { MovieId = movie.Id, ActorId = actor, Character = "test" });
+            }
             //add to change tracker
-            
+            _movieDbContext.Movies.Add(movie);
+
             //savechanges
+            await _movieDbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
     }
