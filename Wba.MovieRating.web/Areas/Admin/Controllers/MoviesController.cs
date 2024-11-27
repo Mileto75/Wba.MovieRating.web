@@ -86,8 +86,30 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Add()
         {
-            //load data in viewmodel
-            return View();
+            var moviesAddViewModel = new MoviesAddViewModel
+            {
+                Companies = await _movieDbContext
+                            .Companies.Select(c => new SelectListItem
+                            {
+                                Text = c.Name,
+                                Value = c.Id.ToString()
+                            }).ToListAsync(),
+                Actors = await _movieDbContext
+                            .Actors.Select(a => new SelectListItem
+                            {
+                                Text = $"{a.Firstname} {a.Lastname}",
+                                Value = a.Id.ToString()
+                            }).ToListAsync(),
+                Directors = await _movieDbContext
+                                   .Directors
+                                   .Select(d => new CheckboxModel
+                                   {
+                                       Id = d.Id,
+                                       Value = $"{d.Firstname} {d.Lastname}"
+                                   }).ToListAsync(),
+            };
+            moviesAddViewModel.ReleaseDate = DateTime.Now;
+            return View(moviesAddViewModel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
