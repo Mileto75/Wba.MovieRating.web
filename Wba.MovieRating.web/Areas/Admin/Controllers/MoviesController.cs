@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.IO;
 using System.Security.Cryptography.Xml;
 using Wba.MovieRating.Core.Entities;
 using Wba.MovieRating.web.Models;
 using Wba.MovieRating.Web.Areas.Admin.Models;
 using Wba.MovieRating.Web.Areas.Admin.ViewModels;
 using Wba.MovieRating.Web.Data;
+using Wba.MovieRating.Web.Services.Interfaces;
 using static System.Net.WebRequestMethods;
 
 namespace Wba.MovieRating.Web.Areas.Admin.Controllers
@@ -17,11 +19,13 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
     {
         private readonly MovieDbContext _movieDbContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IFormBuilderService _formBuilderService;
 
-        public MoviesController(MovieDbContext movieDbContext, IWebHostEnvironment webHostEnvironment)
+        public MoviesController(MovieDbContext movieDbContext, IWebHostEnvironment webHostEnvironment, IFormBuilderService formBuilderService)
         {
             _movieDbContext = movieDbContext;
             _webHostEnvironment = webHostEnvironment;
+            _formBuilderService = formBuilderService;
         }
 
         //shows a list of movies
@@ -88,25 +92,9 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         {
             var moviesAddViewModel = new MoviesAddViewModel
             {
-                Companies = await _movieDbContext
-                            .Companies.Select(c => new SelectListItem
-                            {
-                                Text = c.Name,
-                                Value = c.Id.ToString()
-                            }).ToListAsync(),
-                Actors = await _movieDbContext
-                            .Actors.Select(a => new SelectListItem
-                            {
-                                Text = $"{a.Firstname} {a.Lastname}",
-                                Value = a.Id.ToString()
-                            }).ToListAsync(),
-                Directors = await _movieDbContext
-                                   .Directors
-                                   .Select(d => new CheckboxModel
-                                   {
-                                       Id = d.Id,
-                                       Value = $"{d.Firstname} {d.Lastname}"
-                                   }).ToListAsync(),
+                Companies = await _formBuilderService.GetCompaniesAsync(),
+                Actors = await _formBuilderService.GetActorsAsync(),
+                Directors = await _formBuilderService.GetDirectorsAsync(),
             };
             moviesAddViewModel.ReleaseDate = DateTime.Now;
             return View(moviesAddViewModel);
@@ -124,25 +112,9 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
             }
             if(!ModelState.IsValid)
             {
-                moviesAddViewModel.Companies = await _movieDbContext
-                            .Companies.Select(c => new SelectListItem
-                            {
-                                Text = c.Name,
-                                Value = c.Id.ToString()
-                            }).ToListAsync();
-                moviesAddViewModel.Actors = await _movieDbContext
-                            .Actors.Select(a => new SelectListItem
-                            {
-                                Text = $"{a.Firstname} {a.Lastname}",
-                                Value = a.Id.ToString()
-                            }).ToListAsync();
-                moviesAddViewModel.Directors = await _movieDbContext
-                                   .Directors
-                                   .Select(d => new CheckboxModel
-                                   {
-                                       Id = d.Id,
-                                       Value = $"{d.Firstname} {d.Lastname}"
-                                   }).ToListAsync();
+                moviesAddViewModel.Companies = await _formBuilderService.GetCompaniesAsync();
+                moviesAddViewModel.Actors = await _formBuilderService.GetActorsAsync();
+                moviesAddViewModel.Directors = await _formBuilderService.GetDirectorsAsync();
                 return View(moviesAddViewModel);
             }
             //create the movie
