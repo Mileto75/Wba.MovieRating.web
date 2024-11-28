@@ -2,8 +2,9 @@
 using Wba.MovieRating.Web.Areas.Admin.ViewModels;
 using Wba.MovieRating.web.Models;
 using Wba.MovieRating.Web.Services.Models;
+using Wba.MovieRating.Web.Services.Interfaces;
 
-namespace Wba.MovieRating.Web.Services.Interfaces
+namespace Wba.MovieRating.Web.Services
 {
     public class FileService : IFileService
     {
@@ -28,8 +29,8 @@ namespace Wba.MovieRating.Web.Services.Interfaces
                 File.Delete(path);
                 return true;
             }
-            catch(UnauthorizedAccessException unauthorizedAccessException) 
-            { 
+            catch (UnauthorizedAccessException unauthorizedAccessException)
+            {
                 Console.WriteLine(unauthorizedAccessException.Message);
                 return false;
             }
@@ -51,7 +52,7 @@ namespace Wba.MovieRating.Web.Services.Interfaces
                 catch (UnauthorizedAccessException unauthorizedAccessException)
                 {
                     Console.WriteLine(unauthorizedAccessException.Message);
-                    return new ResultModel 
+                    return new ResultModel
                     {
                         IsSuccess = false,
                         Error = "Something went wrong with the file upload"
