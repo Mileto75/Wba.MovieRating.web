@@ -1,4 +1,4 @@
-﻿namespace Wba.MovieRating.Web.Areas.Admin.ViewModels
+﻿namespace Wba.MovieRating.Web.ViewModels
 {
     public class BaseViewModel
     {

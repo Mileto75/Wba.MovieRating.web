@@ -1,6 +1,4 @@
 ﻿
-using Wba.MovieRating.Web.Areas.Admin.ViewModels;
-using Wba.MovieRating.web.Models;
 using Wba.MovieRating.Web.Services.Models;
 using Wba.MovieRating.Web.Services.Interfaces;
 

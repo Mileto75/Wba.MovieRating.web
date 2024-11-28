@@ -1,0 +1,28 @@
+﻿@model MoviesIndexViewModel
+<h4>
+    Our Movies
+</h4>
+<div class="row">
+    <div class="col col-lg-3 mb-2">
+        <a asp-area="Admin" asp-controller="Movies"
+           asp-action="Add"
+           class="btn btn-success">New movie</a>
+    </div>
+</div>
+<div class="row">
+    @foreach (var movie in Model.Movies)
+    {
+        <div class="col col-lg-3 m-2 text-center">
+            <div class="card" style="width: 18rem;">
+                <!--tips: add .text-center,.text-right to the .card to change card text alignment-->
+                <img src="/images/@movie.Image" class="card-img-top" alt="@movie.Value">
+                <div class="card-body">
+                    <h5 class="card-title">@movie.Value</h5>
+                    <a asp-controller="ShoppingCart"
+                       asp-action="Add" asp-route-id="@movie.Id"
+                       class="btn btn-outline-info">Add to cart</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

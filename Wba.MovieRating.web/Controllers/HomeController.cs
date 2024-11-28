@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using Wba.MovieRating.web.Models;
+using Wba.MovieRating.Web.Models;
 
 namespace Wba.MovieRating.web.Controllers
 {

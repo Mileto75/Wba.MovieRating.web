@@ -1,4 +1,4 @@
-namespace Wba.MovieRating.web.Models
+namespace Wba.MovieRating.Web.Models
 {
     public class ErrorViewModel
     {

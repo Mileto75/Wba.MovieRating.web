@@ -11,6 +11,7 @@ builder.Services.AddDbContext<MovieDbContext>(
     options => options
         .UseSqlServer(builder.Configuration.GetConnectionString("MovieDb"))
     );
+builder.Services.AddSession();
 //add custom services
 builder.Services.AddScoped<IFormBuilderService, FormBuilderService>();
 builder.Services.AddScoped<IFileService, FileService>();
@@ -30,7 +31,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseSession();
 app.UseAuthorization();
 //app.MapControllerRoute(
 //     name: "AdminArea",

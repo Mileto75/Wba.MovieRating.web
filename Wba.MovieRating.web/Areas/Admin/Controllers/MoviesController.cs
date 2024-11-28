@@ -6,13 +6,12 @@ using System;
 using System.IO;
 using System.Security.Cryptography.Xml;
 using Wba.MovieRating.Core.Entities;
-using Wba.MovieRating.web.Models;
-using Wba.MovieRating.Web.Areas.Admin.Models;
 using Wba.MovieRating.Web.Areas.Admin.ViewModels;
 using Wba.MovieRating.Web.Data;
 using Wba.MovieRating.Web.Services.Interfaces;
 using Wba.MovieRating.Web.Services.Models;
 using static System.Net.WebRequestMethods;
+using Wba.MovieRating.Web.ViewModels;
 
 namespace Wba.MovieRating.Web.Areas.Admin.Controllers
 {
