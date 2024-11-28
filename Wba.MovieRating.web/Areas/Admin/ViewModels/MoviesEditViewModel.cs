@@ -6,5 +6,6 @@ namespace Wba.MovieRating.Web.Areas.Admin.ViewModels
     {
         [HiddenInput]
         public int Id { get; set; }
+        public string ImageFilename { get; set; }
     }
 }

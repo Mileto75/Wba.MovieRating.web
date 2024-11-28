@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Security.Cryptography.Xml;
@@ -36,10 +37,10 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         {
             //get the list of movies and put in viewmodel
             var moviesIndexViewModel = new MoviesIndexViewModel
-            { 
+            {
                 Movies = await _movieDbContext
                         .Movies
-                        .Select(m => new MovieBaseViewModel 
+                        .Select(m => new MovieBaseViewModel
                         {
                             Id = m.Id,
                             Value = m.Title,
@@ -105,15 +106,15 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(MoviesAddViewModel moviesAddViewModel)
-        { 
+        {
             //check if movie exists
-            if(await _movieDbContext.Movies
+            if (await _movieDbContext.Movies
                 .AnyAsync(m => m.Title.Equals(moviesAddViewModel.Title)))
             {
                 //add custom error
                 ModelState.AddModelError("Title", "Title exists!");
             }
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 moviesAddViewModel.Companies = await _formBuilderService.GetCompaniesAsync();
                 moviesAddViewModel.Actors = await _formBuilderService.GetActorsAsync();
@@ -126,7 +127,7 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
             if (moviesAddViewModel.Image != null)
             {
                 resultModel = await _fileService.StoreFileAsync(moviesAddViewModel.Image);
-                if (!resultModel.IsSuccess) 
+                if (!resultModel.IsSuccess)
                 {
                     RedirectToAction("Error");
                 }
@@ -157,16 +158,59 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
             _movieDbContext.Movies.Add(movie);
 
             //savechanges
-            await _movieDbContext.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _movieDbContext.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException dbUpdateExceptionn)
+            {
+                Console.Write(dbUpdateExceptionn.Message);
+                return RedirectToAction(nameof(Index));
+            }
+
         }
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
             //get the movie to edit
+            var editMovie = await _movieDbContext
+                .Movies
+                .Include(m => m.Actors)
+                .Include(m => m.Directors)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (editMovie == null)
+            {
+                return NotFound();
+            }
             //create viewmodel
+            var moviesEditViewModel = new MoviesEditViewModel
+            {
+                Title = editMovie.Title,
+                ReleaseDate = editMovie.ReleaseDate,
+                Actors = await _formBuilderService.GetActorsAsync(),
+                //set the movie actors
+                ActorIds = editMovie.Actors.Select(a => a.ActorId),
+                Directors = await _formBuilderService.GetDirectorsAsync(),
+                Companies = await _formBuilderService.GetCompaniesAsync(),
+                //set the movie companyId
+                CompanyId = editMovie.CompanyId,
+                ImageFilename = editMovie.Image ?? "placeholder.svg"
+
+            };
+            //set the directors checkboxes
+            //get the directo ids from editMovie
+            //loop over Directors to set IsChecked
             //fill all te value + the dropdowns and checkboxes
-            return View();
+            moviesEditViewModel.Directors
+                .ForEach(md =>
+                {
+                    if (editMovie.Directors.Select(d => d.Id).Contains(md.Id))
+                    {
+                        md.IsChecked = true;
+                    }
+                });
+            return View(moviesEditViewModel);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -174,10 +218,77 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         {
             //handles the edit form
             //validate
+            if (!ModelState.IsValid)
+            {
+                moviesEditViewModel.Actors = await _formBuilderService.GetActorsAsync();
+                moviesEditViewModel.Companies = await _formBuilderService.GetCompaniesAsync();
+                return View(moviesEditViewModel);
+            }
             //get the movie to edit
+            var editMovie = await _movieDbContext
+                .Movies
+                .Include(m => m.Actors)
+                .Include(m => m.Directors)
+                .FirstOrDefaultAsync(m => m.Id == moviesEditViewModel.Id);
             //edit
+            editMovie.Title = moviesEditViewModel.Title;
+            editMovie.ReleaseDate = moviesEditViewModel.ReleaseDate;
+            editMovie.CompanyId = moviesEditViewModel.CompanyId;
+            editMovie.Actors.Clear();
+            //get the selected directorIds from the checkbox list
+            var selectedDirectorIds = moviesEditViewModel.Directors
+                .Where(d => d.IsChecked).Select(d => d.Id);
+            editMovie.Directors = await _movieDbContext
+                            .Directors.Where(a => selectedDirectorIds
+                            .Contains(a.Id)).ToListAsync();
+            editMovie.Actors = new List<MovieActor>();
+            foreach (var actor in moviesEditViewModel.ActorIds)
+            {
+                editMovie.Actors.Add(new MovieActor
+                {
+                    MovieId = editMovie.Id,
+                    ActorId = actor,
+                    Character = "test",
+                });
+            }
+            //check for image upload
+            if (moviesEditViewModel.Image != null)
+            {
+                var resultModel = new ResultModel();
+                //check if movie has image
+                if (!editMovie.Image.IsNullOrEmpty())
+                {
+                    //delete image on disk
+                    var pathToImage = Path.Combine(_webHostEnvironment.WebRootPath,
+                        "images", editMovie.Image);
+                    if (_fileService.DeleteFile(pathToImage))
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+                //save new file
+                resultModel = await _fileService.StoreFileAsync(moviesEditViewModel.Image);
+                if (!resultModel.IsSuccess)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                editMovie.Image = resultModel.Result;
+            }
             //save to database
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _movieDbContext.SaveChangesAsync();
+                //set success message here
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException dbUpdateExceptionn)
+            {
+                Console.Write(dbUpdateExceptionn.Message);
+                //set success message here
+                return RedirectToAction(nameof(Index));
+                //set error message here
+            }
         }
     }
 }
+

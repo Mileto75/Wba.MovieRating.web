@@ -10,7 +10,7 @@ namespace Wba.MovieRating.Web.Areas.Admin.ViewModels
         public string Title { get; set; }
         [Required]
         [DataType(DataType.Date)]
-        public DateTime ReleaseDate { get; set; }
+        public DateTime? ReleaseDate { get; set; }
         public IEnumerable<SelectListItem> Actors { get; set; }
         [Display(Name = "Actors")]
         public IEnumerable<int> ActorIds { get; set; }
