@@ -1,0 +1,13 @@
+﻿@model MoviesEditViewModel
+
+<div class="row">
+    <div class="col col-lg-5 mx-auto border border-1 rounded rounded-2">
+        <h5>Edit movie</h5>
+        <form asp-controller="Movies" asp-action="Edit" method="post" enctype="multipart/form-data">
+            <partial name="_MovieFormPartial" model="@Model" />
+            @* send the id of the movie *@
+            <input asp-for="Id" />
+            <button type="submit" class="btn btn-primary mb-1">Save</button>
+        </form>
+    </div>
+</div>

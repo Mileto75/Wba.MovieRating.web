@@ -160,5 +160,24 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
             await _movieDbContext.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            //get the movie to edit
+            //create viewmodel
+            //fill all te value + the dropdowns and checkboxes
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(MoviesEditViewModel moviesEditViewModel)
+        {
+            //handles the edit form
+            //validate
+            //get the movie to edit
+            //edit
+            //save to database
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
