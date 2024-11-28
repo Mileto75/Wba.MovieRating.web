@@ -18,13 +18,13 @@
                 <img src="/images/@movie.Image" class="card-img-top" alt="@movie.Value">
                 <div class="card-body">
                     <h5 class="card-title">@movie.Value</h5>
-                    <a asp-area="Admin" asp-controller="Movies"
+                    <a asp-controller="Movies"
                        asp-action="Info" asp-route-id="@movie.Id"
                        class="btn btn-outline-info">Info</a>
-                    <a asp-area="Admin" asp-controller="Movies"
+                    <a asp-controller="Movies"
                        asp-action="Edit" asp-route-id="@movie.Id"
                        class="btn btn-outline-warning">Edit</a>
-                    <a asp-area="Admin" asp-controller="Movies"
+                    <a asp-controller="Movies"
                        asp-action="Delete" asp-route-id="@movie.Id"
                        class="btn btn-outline-danger">Delete</a>
                 </div>

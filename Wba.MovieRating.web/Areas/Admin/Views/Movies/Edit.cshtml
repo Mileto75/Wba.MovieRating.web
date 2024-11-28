@@ -8,7 +8,9 @@
             <partial name="_MovieFormPartial" model="@Model" />
             @* send the id of the movie *@
             <input asp-for="Id" />
-            <button type="submit" class="btn btn-primary mb-1">Save</button>
+            <button type="submit" class="btn btn-success mb-1">Save</button>
+            <a asp-controller="Movies" asp-action="Index"
+               class="btn btn-primary mb-1">Back</a>
         </form>
     </div>
 </div>
