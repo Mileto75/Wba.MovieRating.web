@@ -10,6 +10,7 @@ using Wba.MovieRating.Web.Areas.Admin.Models;
 using Wba.MovieRating.Web.Areas.Admin.ViewModels;
 using Wba.MovieRating.Web.Data;
 using Wba.MovieRating.Web.Services.Interfaces;
+using Wba.MovieRating.Web.Services.Models;
 using static System.Net.WebRequestMethods;
 
 namespace Wba.MovieRating.Web.Areas.Admin.Controllers
@@ -20,12 +21,14 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
         private readonly MovieDbContext _movieDbContext;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IFormBuilderService _formBuilderService;
+        private readonly IFileService _fileService;
 
-        public MoviesController(MovieDbContext movieDbContext, IWebHostEnvironment webHostEnvironment, IFormBuilderService formBuilderService)
+        public MoviesController(MovieDbContext movieDbContext, IWebHostEnvironment webHostEnvironment, IFormBuilderService formBuilderService, IFileService fileService)
         {
             _movieDbContext = movieDbContext;
             _webHostEnvironment = webHostEnvironment;
             _formBuilderService = formBuilderService;
+            _fileService = fileService;
         }
 
         //shows a list of movies
@@ -119,46 +122,13 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
             }
             //create the movie
             //handle file upload
-            var filename = "";
+            var resultModel = new ResultModel();
             if (moviesAddViewModel.Image != null)
             {
-                //create unique filename
-                filename = $"{Guid.NewGuid()}_{moviesAddViewModel.Image.FileName}";
-                //create folder
-                var folderToImages = Path.Combine(_webHostEnvironment.WebRootPath,
-                    "images");
-                if (!Directory.Exists(folderToImages))
+                resultModel = await _fileService.StoreFileAsync(moviesAddViewModel.Image);
+                if (!resultModel.IsSuccess) 
                 {
-                    try
-                    {
-                        Directory.CreateDirectory(folderToImages);
-                    }
-                    catch (UnauthorizedAccessException unauthorizedAccessException)
-                    {
-                        Console.WriteLine(unauthorizedAccessException.Message);
-                        return RedirectToAction("Error", "Home", new ErrorViewModel
-                        {
-                            RequestId = "testApp",
-                        });
-                    }
-                }
-                //create fullpath
-                var fullpath = Path.Combine(folderToImages, filename);
-                //copy to path
-                try
-                {
-                    using (FileStream fileStream = new FileStream(fullpath, FileMode.Create))
-                    {
-                        await moviesAddViewModel.Image.CopyToAsync(fileStream);
-                    }
-                }
-                catch (IOException iOexception)
-                {
-                    Console.WriteLine(iOexception.Message);
-                    return RedirectToAction("Error", "Home", new ErrorViewModel
-                    {
-                        RequestId = "testApp",
-                    });
+                    RedirectToAction("Error");
                 }
             }
             //create the movie
@@ -175,7 +145,7 @@ namespace Wba.MovieRating.Web.Areas.Admin.Controllers
                             .Contains(a.Id)).ToListAsync(),
 
                 CompanyId = moviesAddViewModel.CompanyId,
-                Image = filename
+                Image = resultModel.Result,
             };
             //add the actors
             movie.Actors = new List<MovieActor>();

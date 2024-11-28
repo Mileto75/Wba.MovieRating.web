@@ -13,6 +13,7 @@ builder.Services.AddDbContext<MovieDbContext>(
     );
 //add custom services
 builder.Services.AddScoped<IFormBuilderService, FormBuilderService>();
+builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
